@@ -120,6 +120,7 @@ console.log('\nExample Dep for state.count:', depForCount ? depForCount.getSubsc
 console.log('\n=== setup() Demo ===')
 
 const MyComponent = defineComponent({
+  name: 'MyComponent',
   props: {
     title: { type: String, default: 'Hello' }
   },
@@ -137,11 +138,7 @@ const MyComponent = defineComponent({
       context.emit('update', count.value)
     }
     
-    // Return exposed state and methods
-    return {
-      count,
-      increment
-    }
+    return { count, increment }
   },
   
   mounted() {
@@ -149,16 +146,31 @@ const MyComponent = defineComponent({
   }
 })
 
-console.log('Component defined:', MyComponent.props, MyComponent.emits)
-
-// Demo: createApp (simplified)
-console.log('\n=== createApp Demo ===')
-const app = createApp(MyComponent, { title: 'My App' })
-console.log('App created:', typeof app.mount)
+console.log('Component defined:', MyComponent.name)
 
 // Demo: h() function
 console.log('\n=== h() Demo ===')
 const vnode = h('div', 'Hello')
-console.log('VNode:', vnode)
+console.log('VNode:', JSON.stringify(vnode))
+
+const vnode2 = h('div', [
+  h('span', 'A'),
+  h('span', 'B')
+])
+console.log('VNode with children:', JSON.stringify(vnode2).substring(0, 60) + '...')
+
+// Demo: createApp with DOM (need browser, skip for now)
+console.log('\n=== createApp Demo ===')
+const app = createApp(MyComponent, { title: 'My App' })
+console.log('App created')
+
+// Simulate mount flow manually
+console.log('\n=== Rendering Flow Demo (manual) ===')
+
+const setupState = { count: ref(0), message: ref('Hello') }
+// This is what happens inside mount():
+// 1. createComponentInstance() calls setup()
+// 2. Get render function or convert setupState to VNode
+// 3. render() converts VNode to real DOM
 
 console.log('\n=== setup() demos passed! ===')

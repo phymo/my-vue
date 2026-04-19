@@ -165,3 +165,84 @@ export default defineComponent(() => {
   return () => h('div', count.value)
 })
 ```
+
+## Complete Rendering Flow
+
+Here's how everything connects from `createApp()` to real DOM:
+
+```
+createApp(MyComponent)
+    │
+    ▼
+app.mount('#app')
+    │
+    ▼
+1. Create Component Instance
+   - Call setup() → get setupState
+   - Get render function (if any)
+    │
+    ▼
+2. Call render function → get VNode
+   VNode: { type: 'div', children: [...] }
+    │
+    ▼
+3. render(VNode, container) → Real DOM
+   - createElement('div')
+   - append children recursively
+    │
+    ▼
+4. Mount to DOM container
+   container.appendChild(el)
+    │
+    ▼
+5. Call mounted() hooks
+```
+
+### Why defineComponent Returns Options
+
+```typescript
+// This is what defineComponent does:
+export function defineComponent(options) {
+  return options  // Just returns options!
+}
+```
+
+**Why?** Because:
+
+1. **At runtime**: It's a no-op - just returns the options
+2. **At TypeScript**: It enables type inference for:
+   - `this` in template
+   - Props types
+   - Emit event types
+   - Setup return types
+
+So `defineComponent()` only helps TypeScript. At runtime, it's essentially empty.
+
+### VNode Structure
+
+```typescript
+// h('div', 'Hello')
+{ type: 'div', children: 'Hello' }
+
+// h('div', [h('span', 'A'), h('span', 'B')])
+{
+  type: 'div',
+  children: [
+    { type: 'span', children: 'A' },
+    { type: 'span', children: 'B' }
+  ]
+}
+```
+
+### Virtual DOM Benefits
+
+1. **Platform independent**: Same VNode can render to:
+   - Web DOM
+   - Native iOS/Android
+   - Canvas/WebGL
+   
+2. **Efficient updates**: Vue tracks VNode changes and only updates what's different
+
+3. **Easy testing**: Can test VNode output without DOM
+
+4. **Compiler friendly**: Templates compile to VNode creation functions
