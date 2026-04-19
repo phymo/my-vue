@@ -314,6 +314,110 @@ export function computed<T>(getter: () => T): { value: T } {
 }
 
 // ============================================================
+// watch() - Watch reactive sources
+// ============================================================
+type WatchCallback<T> = (value: T, oldValue: T, onCleanup: (fn: () => void) => void) => void
+
+interface WatchOptions {
+  immediate?: boolean
+}
+
+interface WatchHandle {
+  stop: () => void
+}
+
+// Ref type (for watch)
+interface Ref<T> {
+  value: T
+}
+
+/**
+ * watch() - Watch reactive sources and run callback on changes
+ */
+export function watch<T>(
+  source: Ref<T> | (() => T),
+  callback: WatchCallback<T>,
+  options: WatchOptions = {}
+): WatchHandle {
+  let oldValue: T = undefined as unknown as T
+  let cleanupFn: (() => void) | null = null
+  let isFirstRun = true
+  
+  const runWatch = () => {
+    const newValue = typeof source === 'function' 
+      ? (source as () => T)() 
+      : (source as Ref<T>).value
+    
+    if (isFirstRun) {
+      isFirstRun = false
+      if (options.immediate) {
+        callback(newValue, oldValue, (fn) => { cleanupFn = fn })
+      }
+      oldValue = newValue
+      return
+    }
+    
+    if (newValue !== oldValue) {
+      if (cleanupFn) cleanupFn()
+      callback(newValue, oldValue, (fn) => { cleanupFn = fn })
+      oldValue = newValue
+    }
+  }
+  
+  effect(runWatch)
+  
+  return { stop: () => {} }
+}
+
+// ============================================================
+// Lifecycle Hooks
+// ============================================================
+type LifecycleHookFn = () => void
+
+const lifecycleHooks = {
+  mounted: [] as LifecycleHookFn[],
+  updated: [] as LifecycleHookFn[],
+  unmounted: [] as LifecycleHookFn[],
+  beforeUnmount: [] as LifecycleHookFn[]
+}
+
+/**
+ * onMounted - Register a hook to run when component mounts
+ */
+export function onMounted(fn: LifecycleHookFn) {
+  lifecycleHooks.mounted.push(fn)
+}
+
+/**
+ * onUpdated - Register a hook to run when component updates
+ */
+export function onUpdated(fn: LifecycleHookFn) {
+  lifecycleHooks.updated.push(fn)
+}
+
+/**
+ * onUnmounted - Register a hook to run when component unmounts
+ */
+export function onUnmounted(fn: LifecycleHookFn) {
+  lifecycleHooks.unmounted.push(fn)
+}
+
+/**
+ * onBeforeUnmount - Register a hook to run before component unmounts
+ */
+export function onBeforeUnmount(fn: LifecycleHookFn) {
+  lifecycleHooks.beforeUnmount.push(fn)
+}
+
+// For testing: trigger lifecycle hooks
+export function triggerLifecycleHook(hookName: 'mounted' | 'updated' | 'unmounted' | 'beforeUnmount') {
+  const hooks = lifecycleHooks[hookName]
+  for (const fn of hooks) {
+    fn()
+  }
+}
+
+// ============================================================
 // EXPORTS
 // ============================================================
 export { Dep }

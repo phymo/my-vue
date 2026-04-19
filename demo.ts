@@ -1,4 +1,4 @@
-import { reactive, ref, computed, effect, targetMap, Dep } from './reactivity'
+import { reactive, ref, computed, effect, watch, onMounted, onUpdated, onUnmounted, onBeforeUnmount, triggerLifecycleHook, targetMap, Dep } from './reactivity'
 
 // Demo: reactive()
 console.log('=== reactive() Demo ===')
@@ -35,6 +35,50 @@ console.log('fullName:', fullName.value)
 lastName.value = 'Vue'
 
 console.log('fullName after change:', fullName.value)
+
+// Demo: watch()
+console.log('\n=== watch() Demo ===')
+const watchCount = ref(0)
+
+watch(watchCount, (newVal, oldVal) => {
+  console.log('watch: change from', oldVal, 'to', newVal)
+}, { immediate: true })
+
+watchCount.value = 5
+watchCount.value = 10
+
+// Demo: watch with getter
+const state2 = reactive({ a: 1, b: 2 })
+watch(() => state2.a, (newVal, oldVal) => {
+  console.log('watch getter: state.a changed from', oldVal, 'to', newVal)
+}, { immediate: true })
+
+state2.a = 100
+state2.a = 200
+
+// Demo: Lifecycle hooks
+console.log('\n=== Lifecycle Hooks Demo ===')
+onMounted(() => {
+  console.log('lifecycle: onMounted called')
+})
+onUpdated(() => {
+  console.log('lifecycle: onUpdated called')
+})
+onBeforeUnmount(() => {
+  console.log('lifecycle: onBeforeUnmount called')
+})
+onUnmounted(() => {
+  console.log('lifecycle: onUnmounted called')
+})
+
+console.log('trigger mounted...')
+triggerLifecycleHook('mounted')
+console.log('trigger updated...')
+triggerLifecycleHook('updated')
+console.log('trigger beforeUnmount...')
+triggerLifecycleHook('beforeUnmount')
+console.log('trigger unmounted...')
+triggerLifecycleHook('unmounted')
 
 console.log('\n=== All demos passed! ===')
 
