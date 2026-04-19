@@ -1,4 +1,4 @@
-import { reactive, ref, computed, effect, watch, onMounted, onUpdated, onUnmounted, onBeforeUnmount, triggerLifecycleHook, targetMap, Dep } from './src'
+import { reactive, ref, computed, effect, watch, onMounted, onUpdated, onUnmounted, onBeforeUnmount, triggerLifecycleHook, targetMap, Dep, defineComponent, createApp, h } from './src'
 
 // Demo: reactive()
 console.log('=== reactive() Demo ===')
@@ -115,3 +115,50 @@ printDepsForTarget('lastName ref', lastName)
 const stateDeps = targetMap.get(rawState)
 const depForCount = stateDeps && stateDeps.get('count')
 console.log('\nExample Dep for state.count:', depForCount ? depForCount.getSubscribers() : '<none>')
+
+// Demo: setup() with defineComponent
+console.log('\n=== setup() Demo ===')
+
+const MyComponent = defineComponent({
+  props: {
+    title: { type: String, default: 'Hello' }
+  },
+  emits: ['update'],
+  
+  setup(props, context) {
+    const count = ref(0)
+    
+    console.log('setup: props.title =', props.title)
+    console.log('setup: context.attrs =', context.attrs)
+    console.log('setup: context.emit =', context.emit)
+    
+    const increment = () => {
+      count.value++
+      context.emit('update', count.value)
+    }
+    
+    // Return exposed state and methods
+    return {
+      count,
+      increment
+    }
+  },
+  
+  mounted() {
+    console.log('component: mounted')
+  }
+})
+
+console.log('Component defined:', MyComponent.props, MyComponent.emits)
+
+// Demo: createApp (simplified)
+console.log('\n=== createApp Demo ===')
+const app = createApp(MyComponent, { title: 'My App' })
+console.log('App created:', typeof app.mount)
+
+// Demo: h() function
+console.log('\n=== h() Demo ===')
+const vnode = h('div', 'Hello')
+console.log('VNode:', vnode)
+
+console.log('\n=== setup() demos passed! ===')

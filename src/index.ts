@@ -24,3 +24,6 @@ export {
   onBeforeUnmount,
   triggerLifecycleHook
 } from './lifecycle'
+
+// Component setup
+export { defineComponent, createApp, h, Fragment, SetupContext } from './setup'
