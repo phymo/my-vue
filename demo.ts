@@ -1,4 +1,4 @@
-import { reactive, ref, computed, effect, watch, onMounted, onUpdated, onUnmounted, onBeforeUnmount, triggerLifecycleHook, targetMap, Dep } from './reactivity'
+import { reactive, ref, computed, effect, watch, onMounted, onUpdated, onUnmounted, onBeforeUnmount, triggerLifecycleHook, targetMap, Dep } from './src'
 
 // Demo: reactive()
 console.log('=== reactive() Demo ===')

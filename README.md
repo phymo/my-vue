@@ -92,9 +92,36 @@ fullName after change: Hello Vue
 
 ```
 my-vue/
-├── reactivity.ts   # Core implementation
+├── src/
+│   ├── dep.ts        # Dep class, targetMap, getDep()
+│   ├── effect.ts    # effect(), currentEffect, track(), trigger()
+│   ├── reactive.ts # reactive() - uses effect.ts
+│   ├── ref.ts      # ref() - uses effect.ts
+│   ├── computed.ts # computed() - uses effect.ts
+│   ├── watch.ts    # watch() - uses effect.ts
+│   ├── lifecycle.ts # onMounted, onUpdated, onUnmounted
+│   └── index.ts   # exports all
 ├── demo.ts        # Test demos
-└── README.md     # This file
+├── WATCH.md      # watch() documentation
+├── LIFEHOOKS.md  # lifecycle hooks documentation
+└── README.md    # This file
+```
+
+## Module Dependencies
+
+```
+dep.ts (core)
+    │
+    ▼
+effect.ts
+    │
+    ├──► reactive.ts
+    ├──► ref.ts
+    ├──► computed.ts
+    └──► watch.ts
+          │
+          ▼
+    lifecycle.ts (standalone)
 ```
 
 ## Next Steps
