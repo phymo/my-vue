@@ -20,7 +20,9 @@ type EffectFn = () => void | (() => void)
 export const targetMap = new WeakMap<object, Map<string | symbol, Dep>>()
 
 // Currently running effect (for tracking)
-let activeEffect: EffectFn | null = null
+// Set BEFORE fn() runs, reset AFTER fn() returns
+// This allows track() to know what's currently executing
+let currentEffect: EffectFn | null = null
 
 /**
  * Dep (Dependency) - The core unit of reactivity tracking
@@ -115,28 +117,18 @@ function getDep(target: object, key: string | symbol): Dep {
  * ```
  */
 export function effect(fn: EffectFn): EffectFn {
-  // The actual reactive wrapper
   const reactiveFn = () => {
-    // Set active effect so track() can subscribe it
-    activeEffect = fn
-    shouldTrack = true
+    currentEffect = fn   // 1. Set BEFORE calling fn()
     try {
-      fn()
+      fn()              // 2. fn() runs here - track() sees currentEffect
     } finally {
-      shouldTrack = false
-      activeEffect = null
+      currentEffect = null   // 3. Reset AFTER fn() returns
     }
   }
 
-  // Run immediately (Vue 3 calls this on creation)
   reactiveFn()
-
-  // Return the wrapped function
   return reactiveFn
 }
-
-// Global flag: are we currently inside an effect function?
-let shouldTrack = false
 
 /**
  * track() - Begin tracking a reactive read
@@ -145,9 +137,9 @@ let shouldTrack = false
  * Registers the current effect as a subscriber to that property's Dep.
  */
 function track(target: object, key: string | symbol) {
-  if (shouldTrack && activeEffect) {
+  if (currentEffect) {
     const dep = getDep(target, key)
-    dep.addSub(activeEffect)
+    dep.addSub(currentEffect)
   }
 }
 
