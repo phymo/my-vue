@@ -173,26 +173,6 @@ export function defineComponent(options: ComponentOptions): ComponentOptions {
 // Global component registry (app-level)
 const globalComponents: Record<string, ComponentOptions> = {}
 
-/**
- * app.component() - Register or retrieve global component
- * 
- * Registration:
- *   app.component('MyButton', { ... })
- * 
- * Retrieval:
- *   app.component('MyButton')
- */
-export function component(this: any, name: string, definition?: ComponentOptions): any {
-  if (definition) {
-    // Register
-    globalComponents[name] = definition
-    return this  // chain
-  } else {
-    // Retrieve
-    return globalComponents[name]
-  }
-}
-
 // ============================================================
 // 6. createApp - Create and Mount App
 // ============================================================
