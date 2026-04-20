@@ -164,13 +164,41 @@ console.log('\n=== createApp Demo ===')
 const app = createApp(MyComponent, { title: 'My App' })
 console.log('App created')
 
-// Simulate mount flow manually
-console.log('\n=== Rendering Flow Demo (manual) ===')
+// Demo: Global Component Registration
+console.log('\n=== Component Registration Demo ===')
 
-const setupState = { count: ref(0), message: ref('Hello') }
-// This is what happens inside mount():
-// 1. createComponentInstance() calls setup()
-// 2. Get render function or convert setupState to VNode
-// 3. render() converts VNode to real DOM
+// Define a child component
+const ButtonComponent = defineComponent({
+  name: 'ButtonComponent',
+  props: {
+    label: { type: String, default: 'Click' }
+  },
+  setup(props) {
+    return { label: props.label }
+  }
+})
+
+// Register globally
+app.component('MyButton', ButtonComponent)
+
+// Retrieve registered component
+const registered = app.component('MyButton') as any
+console.log('Registered MyButton:', registered ? registered.name : 'not found')
+
+// Demo: Local Component Registration
+console.log('\n=== Local Component Demo ===')
+
+const ParentComponent = defineComponent({
+  name: 'ParentComponent',
+  components: {
+    MyButton: ButtonComponent
+  },
+  setup() {
+    return { title: 'Parent' }
+  }
+})
+
+console.log('Parent has local components:', ParentComponent.components ? 'yes' : 'no')
+console.log('MyButton in parent:', ParentComponent.components?.MyButton?.name)
 
 console.log('\n=== setup() demos passed! ===')

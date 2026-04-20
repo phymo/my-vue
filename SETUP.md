@@ -246,3 +246,69 @@ So `defineComponent()` only helps TypeScript. At runtime, it's essentially empty
 3. **Easy testing**: Can test VNode output without DOM
 
 4. **Compiler friendly**: Templates compile to VNode creation functions
+
+## Component Registration
+
+### Global Registration
+
+```typescript
+import { createApp, defineComponent } from 'vue'
+
+const app = createApp({})
+
+// Register globally
+app.component('MyButton', {
+  props: { label: String },
+  template: '<button>{{ label }}</button>'
+})
+
+// Retrieve
+const MyButton = app.component('MyButton')
+```
+
+**Usage anywhere in app:**
+```vue
+<template>
+  <MyButton label="Click me" />
+</template>
+```
+
+### Local Registration
+
+```typescript
+import { defineComponent } from 'vue'
+import MyButton from './MyButton.vue'
+
+export default defineComponent({
+  components: {
+    MyButton  // or 'MyButton': MyButton
+  }
+})
+```
+
+### When to Use Which
+
+| Global | Local |
+|--------|-------|
+| UI library components (Button, Input) | App-specific components |
+| Used everywhere | Used in one place |
+| Auto-available | Must import explicitly |
+
+### How It Works
+
+```
+Global:
+  app.component('MyButton', component)
+         │
+         ▼
+  Stored in globalComponents{}
+         │
+         ▼
+  Available in ALL templates
+
+Local:
+  components: { MyButton }
+         │
+         ▼
+  Only available in THAT component's template
+```
